@@ -123,18 +123,26 @@ export const Chat: React.FC<{ user: User; isActive: boolean }> = ({ user, isActi
     }
   }, [messages, isActive]);
 
-  // Outside click handler for Emoji Picker
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showEmojiPicker]);
-
-  // Outside click handler for Plus Menu
+  // Consolidated Outside Click Handler for Emoji Picker and Plus Menu
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node;
+      
+      // Check Emoji Picker
+      if (
+        showEmojiPicker &&
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(target) &&
+        !(event.target as HTMLElement).closest('.emoji-toggle-btn')
+      ) {
+        setShowEmojiPicker(false);
+      }
+      
+      // Check Plus Menu
       if (
         showPlusMenu &&
         plusMenuRef.current &&
-        !plusMenuRef.current.contains(event.target as Node) &&
+        !plusMenuRef.current.contains(target) &&
         !(event.target as HTMLElement).closest('.plus-toggle-btn')
       ) {
         setShowPlusMenu(false);
@@ -142,8 +150,12 @@ export const Chat: React.FC<{ user: User; isActive: boolean }> = ({ user, isActi
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showPlusMenu]);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [showEmojiPicker, showPlusMenu]);
 
   const sendMessage = async (content?: string, image?: string, audio?: string) => {
     if (!content?.trim() && !image && !audio) return;
@@ -447,7 +459,7 @@ export const Chat: React.FC<{ user: User; isActive: boolean }> = ({ user, isActi
           <div className="relative flex items-center" ref={plusMenuRef}>
             <button 
               onClick={() => setShowPlusMenu(!showPlusMenu)} 
-              className={`plus-toggle-btn p-3 transition-all shrink-0 ${showPlusMenu ? 'text-white rotate-45' : 'text-white/10 hover:text-white/40'}`}
+              className={`plus-toggle-btn p-3 transition-all shrink-0 ${showPlusMenu ? 'text-white' : 'text-white/40 hover:text-white'}`}
             >
               <Plus className="w-5 h-5" />
             </button>
@@ -458,7 +470,7 @@ export const Chat: React.FC<{ user: User; isActive: boolean }> = ({ user, isActi
                   initial={{ opacity: 0, scale: 0.8, y: 10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                  className="absolute bottom-full mb-4 left-0 flex flex-col gap-2 p-2 bg-[#0a0a0a]/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl min-w-[50px] items-center"
+                   className="absolute bottom-full mb-4 left-0 flex flex-col gap-2 p-2 bg-[#0a0a0a]/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl min-w-[50px] items-center z-[250]"
                 >
                   <button 
                     onClick={() => {
@@ -496,7 +508,7 @@ export const Chat: React.FC<{ user: User; isActive: boolean }> = ({ user, isActi
             </AnimatePresence>
           </div>
 
-          <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className={`emoji-toggle-btn p-3 transition-colors shrink-0 ${showEmojiPicker ? 'text-white' : 'text-white/10 hover:text-white/40'}`}><Smile className="w-5 h-5" /></button>
+          <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className={`emoji-toggle-btn p-3 transition-colors shrink-0 ${showEmojiPicker ? 'text-white' : 'text-white/40 hover:text-white'}`}><Smile className="w-5 h-5" /></button>
           <input
             ref={inputRef}
             value={input}
