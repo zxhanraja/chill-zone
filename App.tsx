@@ -11,19 +11,19 @@ import { Sidebar } from './components/Sidebar';
 import { Heart, ShieldCheck } from 'lucide-react';
 
 const IMAGES = {
-  Sub: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.05%20AM.jpeg',
-  Dom4u: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.42%20AM.jpeg',
+  ritika: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.05%20AM.jpeg',
+  zxhan: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.42%20AM.jpeg',
   // Optimized versions
-  Sub_Thumb: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.05%20AM.jpeg?tr=w-100,h-100,f-auto',
-  Dom4u_Thumb: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.42%20AM.jpeg?tr=w-100,h-100,f-auto',
-  Sub_Login: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.05%20AM.jpeg?tr=w-400,h-600,f-auto',
-  Dom4u_Login: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.42%20AM.jpeg?tr=w-400,h-600,f-auto'
+  ritika_Thumb: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.05%20AM.jpeg?tr=w-100,h-100,f-auto',
+  zxhan_Thumb: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.42%20AM.jpeg?tr=w-100,h-100,f-auto',
+  ritika_Login: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.05%20AM.jpeg?tr=w-400,h-600,f-auto',
+  zxhan_Login: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.42%20AM.jpeg?tr=w-400,h-600,f-auto'
 };
 
-const SHOW_DOM4U_PROFILE = true;
+const SHOW_ZXHAN_PROFILE = true;
 
 const UserAvatar: React.FC<{ user: User }> = ({ user }) => {
-  const src = user === 'Sub' ? IMAGES.Sub_Thumb : IMAGES.Dom4u_Thumb;
+  const src = user === 'ritika' ? IMAGES.ritika_Thumb : IMAGES.zxhan_Thumb;
 
   return (
     <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform duration-500">
@@ -71,7 +71,7 @@ const App: React.FC = () => {
         });
 
         // Mark users as offline if they are NOT in the current presence state
-        ['Sub', 'Dom4u'].forEach(u => {
+        ['ritika', 'zxhan'].forEach(u => {
           if (!usersInState.has(u) && p[u]) {
             p[u] = { ...p[u], isOnline: false, status: 'offline' };
           }
@@ -207,7 +207,7 @@ const App: React.FC = () => {
 
   const handleMissYou = async (type: 'shake' | 'missyou') => {
     if (!user) return;
-    const recipient = user === 'Sub' ? 'Dom4u' : 'Sub';
+    const recipient = user === 'ritika' ? 'zxhan' : 'ritika';
 
     if (type === 'shake') {
       // Use new shake sync method
@@ -217,8 +217,8 @@ const App: React.FC = () => {
       // Heartbeat/Cinematic broadcast
       sync.publish('missyou', { sender: user, timestamp: Date.now(), type });
 
-      // Persistent Notification for Sub's request
-      const notificationMsg = user === 'Sub' ? 'Sub was missing u' : `${user} was missing u`;
+      // Persistent Notification for ritika's request
+      const notificationMsg = user === 'ritika' ? 'ritika was missing u' : `${user} was missing u`;
       await sync.sendNotification(user, recipient, notificationMsg);
 
       // Web3Forms Email Trigger (Keeping it as is but it's part of the persistent alert)
@@ -228,9 +228,9 @@ const App: React.FC = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             access_key: 'YOUR-WEB3FORMS-KEY-HERE', // User should replace this
-            subject: user === 'Sub' ? 'Sub is missing you!' : `${user} misses you!`,
-            message: user === 'Sub'
-              ? `Hey Dom4u, Sub just sent you a signal from your Private Chill Zone. She's thinking about you!`
+            subject: user === 'ritika' ? 'ritika is missing you!' : `${user} misses you!`,
+            message: user === 'ritika'
+              ? `Hey zxhan, ritika just sent you a signal from your Private Chill Zone. She's thinking about you!`
               : `Hey ${recipient}, ${user} just sent you a signal from your Private Chill Zone. Go check it out!`,
             from_name: 'Chill Bot'
           })
@@ -250,7 +250,7 @@ const App: React.FC = () => {
     return <LoginScreen onLogin={handleLogin} />;
   }
 
-  const otherUser = user === 'Sub' ? 'Dom4u' : 'Sub';
+  const otherUser = user === 'ritika' ? 'zxhan' : 'ritika';
   const isOtherOnline = presence[otherUser]?.isOnline;
 
   const shakeVariants = {
@@ -289,7 +289,7 @@ const App: React.FC = () => {
               </div>
               <div className="w-7 h-7 md:w-10 md:h-10 rounded-full border border-white/[0.05] flex items-center justify-center bg-white/[0.02] overflow-hidden">
                 <img
-                  src={otherUser === 'Sub' ? IMAGES.Sub_Thumb : IMAGES.Dom4u_Thumb}
+                  src={otherUser === 'ritika' ? IMAGES.ritika_Thumb : IMAGES.zxhan_Thumb}
                   alt={otherUser}
                   className="w-full h-full object-cover grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all"
                 />
@@ -352,7 +352,7 @@ const LoginScreen: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) =
           <div className="flex items-center justify-center gap-2 md:gap-4 mt-1 md:mt-2">
             <div className="h-[1px] w-8 md:w-12 bg-white/20" />
             <p className="font-display text-[8px] md:text-xs font-bold uppercase tracking-[0.6em] md:tracking-[0.8em] text-white/50 translate-x-[0.3em] md:translate-x-[0.4em]">
-              Sub & Dom4u
+              ritika & zxhan
             </p>
             <div className="h-[1px] w-8 md:w-12 bg-white/20" />
           </div>
@@ -361,16 +361,16 @@ const LoginScreen: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) =
 
       <div className="flex flex-col md:flex-row gap-4 md:gap-12 z-10 w-full max-w-4xl justify-center items-center mt-20 md:mt-0">
         <LoginCard
-          user="Sub"
-          img={IMAGES.Sub_Login}
-          onClick={() => onLogin('Sub')}
+          user="ritika"
+          img={IMAGES.ritika_Login}
+          onClick={() => onLogin('ritika')}
           accent="#a855f7"
         />
-        {SHOW_DOM4U_PROFILE && (
+        {SHOW_ZXHAN_PROFILE && (
           <LoginCard
-            user="Dom4u"
-            img={IMAGES.Dom4u_Login}
-            onClick={() => onLogin('Dom4u')}
+            user="zxhan"
+            img={IMAGES.zxhan_Login}
+            onClick={() => onLogin('zxhan')}
             accent="#3b82f6"
           />
         )}

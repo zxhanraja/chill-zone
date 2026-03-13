@@ -1,5 +1,5 @@
 
-export type User = 'Dom4u' | 'Sub';
+export type User = 'zxhan' | 'ritika';
 
 export interface Message {
   id: string;

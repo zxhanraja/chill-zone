@@ -63,7 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ active, setActive, user, onLog
           ))}
 
           {/* Heart Icon - MISSING U (Below Arcade) */}
-          {user === 'Sub' && (
+          {user === 'ritika' && (
             <button
               onClick={() => handleAction('missyou')}
               className={`w-12 lg:w-full flex items-center justify-center lg:justify-start gap-5 p-3.5 lg:p-4 rounded-full transition-all group shrink-0 bg-white/[0.03] border border-white/[0.05] text-white/40 hover:text-white hover:bg-white/[0.08] ${pulse === 'missyou' ? 'scale-95 bg-white/10' : ''}`}
@@ -71,7 +71,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ active, setActive, user, onLog
               <Heart className={`w-5 h-5 shrink-0 ${pulse === 'missyou' ? 'animate-pulse fill-white' : ''}`} />
               <div className="hidden lg:block text-left min-w-0">
                 <span className="block font-black uppercase tracking-widest text-[10px] italic">MISSING U</span>
-                <span className="block text-[7px] text-white/30 tracking-wider">Alert Dom4u</span>
+                <span className="block text-[7px] text-white/30 tracking-wider">Alert zxhan</span>
               </div>
             </button>
           )}
@@ -94,7 +94,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ active, setActive, user, onLog
           <div className="flex flex-col lg:flex-row items-center gap-3 lg:gap-4 lg:p-4 lg:bg-white/[0.02] lg:rounded-3xl lg:border lg:border-white/[0.05] group shrink-0">
             <div className="w-12 h-12 lg:w-9 lg:h-9 rounded-full border border-white/10 flex items-center justify-center text-lg bg-black shrink-0 overflow-hidden">
               <img
-                src={user === 'Sub' ? 'https://ik.imagekit.io/ ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.05%20AM.jpeg' : 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.42%20AM.jpeg'}
+                src={user === 'ritika' ? 'https://ik.imagekit.io/ ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.05%20AM.jpeg' : 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.42%20AM.jpeg'}
                 alt={user}
                 className="w-full h-full object-cover opacity-60 hover:opacity-100 transition-opacity"
               />
@@ -127,7 +127,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ active, setActive, user, onLog
         ))}
 
         {/* Heart Icon - MISSING U (After Arcade) */}
-        {user === 'Sub' && (
+        {user === 'ritika' && (
           <button
             onClick={() => handleAction('missyou')}
             className={`flex flex-col items-center gap-1.5 flex-1 transition-all ${pulse === 'missyou' ? 'text-white' : 'text-white/20'}`}
