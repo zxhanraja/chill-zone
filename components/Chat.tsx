@@ -35,6 +35,11 @@ export const Chat: React.FC<{ user: User; isActive: boolean }> = ({ user, isActi
   const [offlineQueue, setOfflineQueue] = useState<any[]>(sync.getQueue());
   const emojiPickerRef = useRef<HTMLDivElement>(null); // Ref for outside click
   const plusMenuRef = useRef<HTMLDivElement>(null); // Ref for outside click on plus menu
+  const latestMessagesRef = useRef<Message[]>([]); // To reliably access the latest messages inside closures
+
+  useEffect(() => {
+    latestMessagesRef.current = messages;
+  }, [messages]);
 
   useEffect(() => {
     // Initial fetch from Supabase with retry
@@ -167,14 +172,22 @@ export const Chat: React.FC<{ user: User; isActive: boolean }> = ({ user, isActi
     // Expiry: 48h for all (Text, Image, Voice) as requested
     const expiryHours = 48;
 
+    // Prevent messages from going "up" due to client clock differences:
+    // Ensure the new timestamp is STRICTLY GREATER than the last known message timestamp.
+    const lastMsg = latestMessagesRef.current[latestMessagesRef.current.length - 1];
+    let msgTimestamp = Date.now();
+    if (lastMsg && lastMsg.timestamp >= msgTimestamp) {
+      msgTimestamp = lastMsg.timestamp + 1;
+    }
+
     const msg: Message = {
       id: Math.random().toString(36).substr(2, 9),
       sender: user,
       content: audio || content, // Audio goes to content
       image: image,
       type: type,
-      timestamp: Date.now(),
-      expiresAt: Date.now() + expiryHours * 60 * 60 * 1000,
+      timestamp: msgTimestamp,
+      expiresAt: msgTimestamp + expiryHours * 60 * 60 * 1000,
       reactions: {}
     };
 
