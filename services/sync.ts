@@ -11,6 +11,8 @@ class SyncService {
   private listeners: Record<string, Function[]> = {};
   private channel: any;
   private offlineQueue: any[] = [];
+  private status: string = 'INITIAL';
+  private lastError: any = null;
 
   constructor() {
     this.offlineQueue = this.getLocal('offline_queue', []);
@@ -33,6 +35,7 @@ class SyncService {
         }
       })
       .subscribe((status: string, err?: any) => {
+        this.status = status;
         if (status === 'SUBSCRIBED') {
           console.log('Sync: Connected to Realtime');
           this.processOfflineQueue();
@@ -40,7 +43,7 @@ class SyncService {
           console.warn(`Sync: Connection ${status}, re-subscribing...`, err);
           setTimeout(() => {
             console.log('Sync: Attempting to re-subscribe...');
-            this.channel.subscribe();
+            if (this.channel) this.channel.subscribe();
           }, 2000);
         } else {
           console.warn('Sync Status:', status, err);
@@ -61,12 +64,26 @@ class SyncService {
 
   async trackUser(user: string, status: 'online' | 'away' | 'offline') {
     if (this.channel) {
-      await this.channel.track({
-        user,
-        status,
-        online_at: new Date().toISOString(),
-      });
+      console.log(`Sync: Tracking presence for ${user} as ${status}`);
+      try {
+        await this.channel.track({
+          user,
+          status,
+          online_at: new Date().toISOString(),
+        });
+      } catch (e) {
+        console.error('Sync: Track error:', e);
+      }
     }
+  }
+
+  getConnectionStatus() {
+    return {
+      status: this.status,
+      online: navigator.onLine,
+      hasChannel: !!this.channel,
+      queueLength: this.offlineQueue.length
+    };
   }
 
   subscribe(type: string, callback: Function) {
@@ -335,10 +352,43 @@ class SyncService {
       .single();
 
     if (error) {
-      console.log(`Sync: No state found for key '${key}'`);
+      // Don't log as error if just no state found (first time)
       return null;
     }
     return data?.data || null;
+  }
+
+  // Helper for batch data migration
+  async migrateFromUvula(targetUser: string) {
+    if (targetUser !== 'kiwi') return; // Only migrate if we are kiwi
+
+    console.log('Sync: Checking for records to migrate from uvula...');
+    
+    // 1. Migrate Scores
+    const { data: scores } = await supabase.from('scores').select('*').eq('user_id', 'uvula');
+    if (scores && scores.length > 0) {
+      console.log('Sync: Migrating scores for uvula...');
+      const oldScore = scores[0].score;
+      // Get current kiwi score
+      const { data: kiwiScores } = await supabase.from('scores').select('*').eq('user_id', 'kiwi');
+      const currentKiwiScore = (kiwiScores && kiwiScores.length > 0) ? kiwiScores[0].score : 0;
+      
+      await supabase.from('scores').upsert({
+        user_id: 'kiwi',
+        score: currentKiwiScore + oldScore,
+        updated_at: Date.now()
+      });
+      // Optionally delete old score or mark as migrated
+      await supabase.from('scores').delete().eq('user_id', 'uvula');
+    }
+
+    // 2. Migrate Presence (latest status)
+    await supabase.from('presence').update({ user_id: 'kiwi' }).eq('user_id', 'uvula');
+
+    // 3. Migrate Strokes
+    await supabase.from('canvas_strokes').update({ user_id: 'kiwi' }).eq('user_id', 'uvula');
+
+    console.log('Sync: Migration completed.');
   }
 
   subscribeToTable(table: string, callback: Function) {
@@ -371,7 +421,7 @@ class SyncService {
     await this.channel.send({
       type: 'broadcast',
       event: 'state_change',
-      payload: { type: 'shake', data: { from, to, timestamp: Date.now() } },
+      payload: { type: 'shake', data: { from, sender: from, to, recipient: to, timestamp: Date.now() } },
     });
   }
 

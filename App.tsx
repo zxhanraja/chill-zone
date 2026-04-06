@@ -37,6 +37,7 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('chat');
   const [accent, setAccent] = useState(() => localStorage.getItem('theme_accent') || '#ffffff');
   const [presence, setPresence] = useState<any>({});
+  const [syncStatus, setSyncStatus] = useState<any>(sync.getConnectionStatus());
 
   const [isShaking, setIsShaking] = useState(false);
 
@@ -53,6 +54,7 @@ const App: React.FC = () => {
     });
 
     const unsubPresenceSync = sync.subscribe('presence_sync', (state: any) => {
+      console.log('App: Presence sync received:', state);
       setPresence((prev: any) => {
         const p: any = { ...prev };
         const usersInState = new Set();
@@ -60,9 +62,10 @@ const App: React.FC = () => {
         Object.keys(state).forEach(key => {
           const presenceEntry = state[key][0];
           if (presenceEntry) {
-            usersInState.add(presenceEntry.user);
-            p[presenceEntry.user] = {
-              user: presenceEntry.user,
+            const userId = presenceEntry.user;
+            usersInState.add(userId);
+            p[userId] = {
+              user: userId,
               isOnline: presenceEntry.status === 'online',
               status: presenceEntry.status,
               lastSeen: Date.now()
@@ -70,16 +73,20 @@ const App: React.FC = () => {
           }
         });
 
-        // Mark users as offline if they are NOT in the current presence state
+        // Hardcoded users to check offline status
         ['kiwi', 'dom4u'].forEach(u => {
-          if (!usersInState.has(u) && p[u]) {
-            p[u] = { ...p[u], isOnline: false, status: 'offline' };
+          if (!usersInState.has(u)) {
+            p[u] = { ...(p[u] || {}), user: u, isOnline: false, status: 'offline' };
           }
         });
 
         return p;
       });
     });
+
+    const statusInterval = setInterval(() => {
+      setSyncStatus(sync.getConnectionStatus());
+    }, 5000);
 
     const unsubPresence = sync.subscribe('presence', (data: any) => {
       setPresence((prev: any) => ({ ...prev, [data.user]: data }));
@@ -182,6 +189,7 @@ const App: React.FC = () => {
         unsubTheme();
         unsubPresence();
         unsubPresenceSync();
+        clearInterval(statusInterval);
         unsubMissYou();
         unsubShake();
         unsubThemeTable();
@@ -197,12 +205,22 @@ const App: React.FC = () => {
       unsubPresence();
       unsubMissYou();
       unsubShake();
+      clearInterval(statusInterval);
     };
   }, [user]);
 
-  const handleLogin = (u: User) => {
+  const handleLogin = async (u: User) => {
     setUser(u);
     localStorage.setItem('user_id', u);
+    
+    // Migration: Run once if logging in as kiwi
+    if (u === 'kiwi') {
+      try {
+        await sync.migrateFromUvula('kiwi');
+      } catch (e) {
+        console.error('Migration error:', e);
+      }
+    }
   };
 
   const handleMissYou = async (type: 'shake' | 'missyou') => {
@@ -269,6 +287,13 @@ const App: React.FC = () => {
       style={{ '--accent': accent } as any}
     >
       <Sidebar active={activeTab} setActive={setActiveTab} user={user} onLogout={() => { setUser(null); localStorage.removeItem('user_id'); }} accent={accent} setAccent={handleSetAccent} onMissYou={handleMissYou} />
+      
+      {/* Active Sync Status Indicator */}
+      <div className="fixed top-4 right-4 z-[200] flex items-center gap-2 px-3 py-1.5 bg-black/40 backdrop-blur-xl border border-white/5 rounded-full pointer-events-none">
+        <div className={`w-1.5 h-1.5 rounded-full ${syncStatus.status === 'SUBSCRIBED' ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : 'bg-red-500 shadow-[0_0_8px_#ef4444] animate-pulse'}`} />
+        <span className="text-[7px] font-black tracking-widest uppercase opacity-40">{syncStatus.status}</span>
+      </div>
+
       <main className="flex-1 relative flex flex-col bg-[#000000] min-w-0 h-full overflow-hidden">
         <header className={`absolute top-0 left-0 right-0 z-50 bg-[#000000] transition-all duration-300 ${activeTab === 'games' ? 'opacity-0 pointer-events-none -translate-y-full' : 'opacity-100 translate-y-0'}`}>
           <div className="px-4 md:px-10 py-3 md:py-4 flex justify-between items-center">

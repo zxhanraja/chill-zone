@@ -107,18 +107,25 @@ export const MusicSyncBar: React.FC<{ user: User; activeTab?: string }> = ({ use
 
     // Periodic position broadcast to keep users in sync and handle drift
     const syncInterval = setInterval(() => {
-      if (playerRef.current && playerReady && currentMusic.isPlaying && currentMusic.addedBy === user) {
-        const currentPos = playerRef.current.getCurrentTime();
-        if (currentPos !== undefined) {
-          sync.publish('music', {
-            ...currentMusic,
-            currentPosition: currentPos,
-            lastUpdatedBy: user,
-            isHeartbeat: true
-          });
+      // Only the person who added the music (or currently identifies as the owner) sends heartbeats
+      const isOwner = currentMusic.addedBy === user || (currentMusic.addedBy === 'uvula' && user === 'kiwi');
+      
+      if (playerRef.current && playerReady && currentMusic.isPlaying && isOwner) {
+        try {
+          const currentPos = playerRef.current.getCurrentTime();
+          if (currentPos !== undefined) {
+            sync.publish('music', {
+              ...currentMusic,
+              currentPosition: currentPos,
+              lastUpdatedBy: user,
+              isHeartbeat: true
+            });
+          }
+        } catch (e) {
+          // ignore player errors during heartbeat
         }
       }
-    }, 10000); // Sync every 10 seconds if we are the one who added the music
+    }, 10000); 
 
     return () => {
       unsubBroadcast();
@@ -127,11 +134,13 @@ export const MusicSyncBar: React.FC<{ user: User; activeTab?: string }> = ({ use
       window.removeEventListener('beforeunload', saveStateOnExit);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [user, currentMusic.isPlaying, currentMusic.addedBy, playerReady]);
 
   // Sync player state with currentMusic
   useEffect(() => {
     if (!currentMusic.ytId) return;
+
+    const isOurUpdate = currentMusic.lastUpdatedBy === user || (currentMusic.lastUpdatedBy === 'uvula' && user === 'kiwi');
 
     if (!playerRef.current) {
       if (!(window as any).YT || !(window as any).YT.Player) return;
