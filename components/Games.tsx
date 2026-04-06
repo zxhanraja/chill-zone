@@ -7,19 +7,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export const Games: React.FC<{ user: User }> = ({ user }) => {
   const [currentGame, setCurrentGame] = useState<'tictactoe' | 'connect4' | 'word' | 'truthordare' | 'reaction' | 'rps' | 'menu'>('menu');
-  const [scores, setScores] = useState<Record<string, number>>({ uvula: 0, dom4u: 0 });
+  const [scores, setScores] = useState<Record<string, number>>({ kiwi: 0, dom4u: 0 });
   const [winner, setWinner] = useState<{ name: User; msg: string } | null>(null);
 
   // States
   const [board, setBoard] = useState<(string | null)[]>(Array(9).fill(null));
   const [xIsNext, setXIsNext] = useState(true);
   const [c4Board, setC4Board] = useState<(string | null)[][]>(Array(6).fill(null).map(() => Array(7).fill(null)));
-  const [c4Turn, setC4Turn] = useState<User>('uvula');
+  const [c4Turn, setC4Turn] = useState<User>('kiwi');
   const [wordState, setWordState] = useState({ word: '', guesses: [] as string[], setter: '' as User | '', status: 'setting' as 'setting' | 'guessing' | 'won' | 'lost' });
   const [wordInput, setWordInput] = useState('');
   const [tdActive, setTdActive] = useState<{ type: 'truth' | 'dare' | '', content: '' }>({ type: '', content: '' });
   const [reactionState, setReactionState] = useState({ status: 'waiting', startTime: 0, scores: {} as any });
-  const [rpsState, setRpsState] = useState<Record<User, string | null>>({ uvula: null, dom4u: null });
+  const [rpsState, setRpsState] = useState<Record<User, string | null>>({ kiwi: null, dom4u: null });
 
   // TTT Infinity Logic: Track [ { index, symbol } ]
   const [tttHistory, setTttHistory] = useState<{ index: number; symbol: string }[]>([]);
@@ -30,7 +30,7 @@ export const Games: React.FC<{ user: User }> = ({ user }) => {
   useEffect(() => {
     // Initial fetch
     sync.fetchScores().then(data => {
-      const s: any = { uvula: 0, dom4u: 0 };
+      const s: any = { kiwi: 0, dom4u: 0 };
       data.forEach((item: any) => s[item.user_id] = item.score);
       setScores(s);
     });
@@ -88,7 +88,7 @@ export const Games: React.FC<{ user: User }> = ({ user }) => {
       setTttHistory([]);
       setC4Board(Array(6).fill(null).map(() => Array(7).fill(null)));
       setWordState({ word: '', guesses: [], setter: '', status: 'setting' });
-      setRpsState({ uvula: null, dom4u: null });
+      setRpsState({ kiwi: null, dom4u: null });
       setReactionState({ status: 'waiting', startTime: 0, scores: {} });
       setTdActive({ type: '', content: '' } as any);
       setWinner(null);
@@ -131,7 +131,7 @@ export const Games: React.FC<{ user: User }> = ({ user }) => {
 
   const resetGame = () => {
     setWinner(null);
-    const nextStarting = startingPlayer === 'uvula' ? 'dom4u' : 'uvula';
+    const nextStarting = startingPlayer === 'kiwi' ? 'dom4u' : 'kiwi';
     setStartingPlayer(nextStarting);
     sync.publish('game', { type: 'reset', startingPlayer: nextStarting });
   };
@@ -160,7 +160,7 @@ export const Games: React.FC<{ user: User }> = ({ user }) => {
 
       const winner = calculateTTTWinner(nextBoard);
       if (winner === 'X') handleWin('dom4u');
-      if (winner === 'O') handleWin('uvula');
+      if (winner === 'O') handleWin('kiwi');
     } else {
       nextBoard[i] = symbol;
       setBoard(nextBoard);
@@ -170,7 +170,7 @@ export const Games: React.FC<{ user: User }> = ({ user }) => {
 
       const winner = calculateTTTWinner(nextBoard);
       if (winner === 'X') handleWin('dom4u');
-      if (winner === 'O') handleWin('uvula');
+      if (winner === 'O') handleWin('kiwi');
     }
   };
 
@@ -186,7 +186,7 @@ export const Games: React.FC<{ user: User }> = ({ user }) => {
       }
     }
     if (placedRow === -1) return;
-    const nextTurn = user === 'uvula' ? 'dom4u' : 'uvula';
+    const nextTurn = user === 'kiwi' ? 'dom4u' : 'kiwi';
     setC4Board(nextBoard);
     setC4Turn(nextTurn);
     sync.publish('game', { type: 'connect4', board: nextBoard, turn: nextTurn });
@@ -201,16 +201,16 @@ export const Games: React.FC<{ user: User }> = ({ user }) => {
     setRpsState(nextRps);
     sync.publish('game', { type: 'rps', state: nextRps });
 
-    if (nextRps.uvula && nextRps.dom4u) {
-      const res = getRPSResult(nextRps.uvula, nextRps.dom4u);
-      if (res === 'UVULA WINS') {
-        handleWin('uvula');
+    if (nextRps.kiwi && nextRps.dom4u) {
+      const res = getRPSResult(nextRps.kiwi, nextRps.dom4u);
+      if (res === 'KIWI WINS') {
+        handleWin('kiwi');
       } else if (res === 'DOM4U WINS') {
         handleWin('dom4u');
       } else {
         // Tie - reset after a short delay or just let them pick again
         setTimeout(() => {
-          const resetRps = { uvula: null, dom4u: null };
+          const resetRps = { kiwi: null, dom4u: null };
           setRpsState(resetRps);
           sync.publish('game', { type: 'rps', state: resetRps });
         }, 2000);
@@ -226,7 +226,7 @@ export const Games: React.FC<{ user: User }> = ({ user }) => {
     sync.publish('game', { type: 'reaction', state: nextState });
 
     // Check if both played
-    const other = user === 'uvula' ? 'dom4u' : 'uvula';
+    const other = user === 'kiwi' ? 'dom4u' : 'kiwi';
     if (nextState.scores[other]) {
       const myTime = time;
       const otherTime = nextState.scores[other];
@@ -282,8 +282,8 @@ export const Games: React.FC<{ user: User }> = ({ user }) => {
   const ScoreBoard = ({ minimal = false }: { minimal?: boolean }) => (
     <div className={`flex items-center justify-center gap-3 md:gap-8 ${minimal ? 'mb-2' : 'mb-8'}`}>
       <div className={`flex flex-col items-center ${minimal ? 'p-2 md:p-3' : 'p-3 md:p-5'} bg-white/[0.02] border border-white/5 rounded-2xl min-w-[70px] md:min-w-[120px]`}>
-        <span className="text-[7px] md:text-[10px] font-black tracking-widest opacity-30 italic leading-none">UVULA</span>
-        <span className={`${minimal ? 'text-xl md:text-2xl' : 'text-2xl md:text-4xl'} font-display font-black text-[var(--accent)] mt-1`}>{scores.uvula}</span>
+        <span className="text-[7px] md:text-[10px] font-black tracking-widest opacity-30 italic leading-none">KIWI</span>
+        <span className={`${minimal ? 'text-xl md:text-2xl' : 'text-2xl md:text-4xl'} font-display font-black text-[var(--accent)] mt-1`}>{scores.kiwi}</span>
       </div>
       <div className="h-6 md:h-8 w-[1px] bg-white/5" />
       <div className={`flex flex-col items-center ${minimal ? 'p-2 md:p-3' : 'p-3 md:p-5'} bg-white/[0.02] border border-white/5 rounded-2xl min-w-[70px] md:min-w-[120px]`}>
@@ -374,7 +374,7 @@ export const Games: React.FC<{ user: User }> = ({ user }) => {
               <p className="text-[7px] md:text-[8px] font-bold text-blue-500 uppercase tracking-[0.4em]">4 IN A ROW TO CONQUER</p>
             </div>
             <div className="flex items-center gap-4 mb-4">
-              <div className={`w-3 h-3 rounded-full ${c4Turn === 'uvula' ? 'bg-purple-500 animate-pulse' : 'bg-white/10'}`} />
+              <div className={`w-3 h-3 rounded-full ${c4Turn === 'kiwi' ? 'bg-purple-500 animate-pulse' : 'bg-white/10'}`} />
               <span className="text-[10px] font-black uppercase tracking-widest italic">{c4Turn}'S TURN</span>
               <div className={`w-3 h-3 rounded-full ${c4Turn === 'dom4u' ? 'bg-blue-500 animate-pulse' : 'bg-white/10'}`} />
             </div>
@@ -389,7 +389,7 @@ export const Games: React.FC<{ user: User }> = ({ user }) => {
                           key={rowIndex}
                           onClick={() => handleC4Click(colIndex)}
                           className={`w-10 h-10 md:w-14 md:h-14 rounded-full border border-white/5 transition-all flex items-center justify-center
-                          ${!cell ? 'bg-black/40 hover:bg-black/60' : (cell === 'uvula' ? 'bg-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]' : 'bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.4)]')}
+                          ${!cell ? 'bg-black/40 hover:bg-black/60' : (cell === 'kiwi' ? 'bg-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]' : 'bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.4)]')}
                         `}
                         >
                           {cell && <div className="w-6 h-6 md:w-8 md:h-8 rounded-full border-2 border-white/20" />}
@@ -457,14 +457,14 @@ export const Games: React.FC<{ user: User }> = ({ user }) => {
             </div>
             <div className="flex justify-between w-full mb-4 px-4 md:px-8">
               <div className="flex flex-col items-center gap-3">
-                <div className={`w-16 h-16 md:w-20 md:h-20 rounded-[1.5rem] md:rounded-3xl border-2 ${rpsState.uvula ? 'bg-white/10 border-white' : 'bg-white/5 border-white/5'} flex items-center justify-center text-3xl md:text-4xl shadow-2xl`}>
-                  {rpsState.uvula && rpsState.dom4u ? getRPSGlyph(rpsState.uvula) : (rpsState.uvula ? '✅' : '?')}
+                <div className={`w-16 h-16 md:w-20 md:h-20 rounded-[1.5rem] md:rounded-3xl border-2 ${rpsState.kiwi ? 'bg-white/10 border-white' : 'bg-white/5 border-white/5'} flex items-center justify-center text-3xl md:text-4xl shadow-2xl`}>
+                  {rpsState.kiwi && rpsState.dom4u ? getRPSGlyph(rpsState.kiwi) : (rpsState.kiwi ? '✅' : '?')}
                 </div>
-                <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-20 italic">UVULA</span>
+                <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-20 italic">KIWI</span>
               </div>
               <div className="flex flex-col items-center gap-3">
                 <div className={`w-16 h-16 md:w-20 md:h-20 rounded-[1.5rem] md:rounded-3xl border-2 ${rpsState.dom4u ? 'bg-white/10 border-white' : 'bg-white/5 border-white/5'} flex items-center justify-center text-3xl md:text-4xl shadow-2xl`}>
-                  {rpsState.uvula && rpsState.dom4u ? getRPSGlyph(rpsState.dom4u) : (rpsState.dom4u ? '✅' : '?')}
+                  {rpsState.kiwi && rpsState.dom4u ? getRPSGlyph(rpsState.dom4u) : (rpsState.dom4u ? '✅' : '?')}
                 </div>
                 <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-20 italic">DOM4U</span>
               </div>
@@ -605,7 +605,7 @@ export const Games: React.FC<{ user: User }> = ({ user }) => {
                 <button
                   onClick={() => {
                     if (currentGame === 'tictactoe') {
-                      const nextStart = startingPlayer === 'uvula' ? 'dom4u' : 'uvula';
+                      const nextStart = startingPlayer === 'kiwi' ? 'dom4u' : 'kiwi';
                       const nextBoard = Array(9).fill(null);
                       setBoard(nextBoard);
                       setTttHistory([]);
@@ -617,9 +617,9 @@ export const Games: React.FC<{ user: User }> = ({ user }) => {
                         history: []
                       });
                     }
-                    if (currentGame === 'rps') { setRpsState({ uvula: null, dom4u: null }); sync.publish('game', { type: 'rps', state: { uvula: null, dom4u: null } }); }
+                    if (currentGame === 'rps') { setRpsState({ kiwi: null, dom4u: null }); sync.publish('game', { type: 'rps', state: { kiwi: null, dom4u: null } }); }
                     if (currentGame === 'connect4') {
-                      const nextStart = startingPlayer === 'uvula' ? 'dom4u' : 'uvula';
+                      const nextStart = startingPlayer === 'kiwi' ? 'dom4u' : 'kiwi';
                       const nextBoard = Array(6).fill(null).map(() => Array(7).fill(null));
                       setC4Board(nextBoard);
                       setC4Turn(nextStart);
@@ -689,6 +689,6 @@ function getRPSResult(m1: string, m2: string) {
     lizard: ['spock', 'paper'],
     spock: ['scissors', 'rock']
   };
-  if (rules[m1].includes(m2)) return "UVULA WINS";
+  if (rules[m1].includes(m2)) return "KIWI WINS";
   return "DOM4U WINS";
 }

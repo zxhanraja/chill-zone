@@ -1,5 +1,5 @@
 
-export type User = 'dom4u' | 'uvula';
+export type User = 'dom4u' | 'kiwi';
 
 export interface Message {
   id: string;

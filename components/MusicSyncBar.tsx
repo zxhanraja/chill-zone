@@ -17,16 +17,27 @@ export const MusicSyncBar: React.FC<{ user: User; activeTab?: string }> = ({ use
 
   useEffect(() => {
     // Load YouTube API
-    if (!(window as any).YT) {
-      const tag = document.createElement('script');
-      tag.src = "https://www.youtube.com/iframe_api";
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-    }
-
-    (window as any).onYouTubeIframeAPIReady = () => {
-      console.log('YT API Ready');
+    const loadYT = () => {
+      if (!(window as any).YT) {
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+      }
     };
+    loadYT();
+
+    if (!(window as any).onYouTubeIframeAPIReady) {
+      (window as any).onYouTubeIframeAPIReady = () => {
+        console.log('YT API Ready');
+        setPlayerReady(true);
+      };
+    } else {
+      // If already defined, API might be ready or loading
+      if ((window as any).YT && (window as any).YT.Player) {
+        setPlayerReady(true);
+      }
+    }
 
     // Initial fetch from database
     const loadInitialState = async () => {
@@ -94,9 +105,25 @@ export const MusicSyncBar: React.FC<{ user: User; activeTab?: string }> = ({ use
     window.addEventListener('beforeunload', saveStateOnExit);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
+    // Periodic position broadcast to keep users in sync and handle drift
+    const syncInterval = setInterval(() => {
+      if (playerRef.current && playerReady && currentMusic.isPlaying && currentMusic.addedBy === user) {
+        const currentPos = playerRef.current.getCurrentTime();
+        if (currentPos !== undefined) {
+          sync.publish('music', {
+            ...currentMusic,
+            currentPosition: currentPos,
+            lastUpdatedBy: user,
+            isHeartbeat: true
+          });
+        }
+      }
+    }, 10000); // Sync every 10 seconds if we are the one who added the music
+
     return () => {
       unsubBroadcast();
       unsubDB();
+      clearInterval(syncInterval);
       window.removeEventListener('beforeunload', saveStateOnExit);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };

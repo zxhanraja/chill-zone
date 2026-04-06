@@ -11,19 +11,19 @@ import { Sidebar } from './components/Sidebar';
 import { Heart, ShieldCheck } from 'lucide-react';
 
 const IMAGES = {
-  uvula: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.05%20AM.jpeg',
+  kiwi: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.05%20AM.jpeg',
   dom4u: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.42%20AM.jpeg',
   // Optimized versions
-  uvula_Thumb: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.05%20AM.jpeg?tr=w-100,h-100,f-auto',
+  kiwi_Thumb: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.05%20AM.jpeg?tr=w-100,h-100,f-auto',
   dom4u_Thumb: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.42%20AM.jpeg?tr=w-100,h-100,f-auto',
-  uvula_Login: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.05%20AM.jpeg?tr=w-400,h-600,f-auto',
+  kiwi_Login: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.05%20AM.jpeg?tr=w-400,h-600,f-auto',
   dom4u_Login: 'https://ik.imagekit.io/ioktbcewp/WhatsApp%20Image%202026-03-11%20at%2010.48.42%20AM.jpeg?tr=w-400,h-600,f-auto'
 };
 
 const SHOW_DOM4U_PROFILE = true;
 
 const UserAvatar: React.FC<{ user: User }> = ({ user }) => {
-  const src = user === 'uvula' ? IMAGES.uvula_Thumb : IMAGES.dom4u_Thumb;
+  const src = user === 'kiwi' ? IMAGES.kiwi_Thumb : IMAGES.dom4u_Thumb;
 
   return (
     <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 transition-transform duration-500">
@@ -71,7 +71,7 @@ const App: React.FC = () => {
         });
 
         // Mark users as offline if they are NOT in the current presence state
-        ['uvula', 'dom4u'].forEach(u => {
+        ['kiwi', 'dom4u'].forEach(u => {
           if (!usersInState.has(u) && p[u]) {
             p[u] = { ...p[u], isOnline: false, status: 'offline' };
           }
@@ -207,7 +207,7 @@ const App: React.FC = () => {
 
   const handleMissYou = async (type: 'shake' | 'missyou') => {
     if (!user) return;
-    const recipient = user === 'uvula' ? 'dom4u' : 'uvula';
+    const recipient = user === 'kiwi' ? 'dom4u' : 'kiwi';
 
     if (type === 'shake') {
       // Use new shake sync method
@@ -217,8 +217,8 @@ const App: React.FC = () => {
       // Heartbeat/Cinematic broadcast
       sync.publish('missyou', { sender: user, timestamp: Date.now(), type });
 
-      // Persistent Notification for uvula's request
-      const notificationMsg = user === 'uvula' ? 'uvula was missing u' : `${user} was missing u`;
+      // Persistent Notification for kiwi's request
+      const notificationMsg = user === 'kiwi' ? 'kiwi was missing u' : `${user} was missing u`;
       await sync.sendNotification(user, recipient, notificationMsg);
 
       // Web3Forms Email Trigger (Keeping it as is but it's part of the persistent alert)
@@ -228,9 +228,9 @@ const App: React.FC = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             access_key: 'YOUR-WEB3FORMS-KEY-HERE', // User should replace this
-            subject: user === 'uvula' ? 'uvula is missing you!' : `${user} misses you!`,
-            message: user === 'uvula'
-              ? `Hey dom4u, uvula just sent you a signal from your Private Chill Zone. She's thinking about you!`
+            subject: user === 'kiwi' ? 'kiwi is missing you!' : `${user} misses you!`,
+            message: user === 'kiwi'
+              ? `Hey dom4u, kiwi just sent you a signal from your Private Chill Zone. She's thinking about you!`
               : `Hey ${recipient}, ${user} just sent you a signal from your Private Chill Zone. Go check it out!`,
             from_name: 'Chill Bot'
           })
@@ -250,7 +250,7 @@ const App: React.FC = () => {
     return <LoginScreen onLogin={handleLogin} />;
   }
 
-  const otherUser = user === 'uvula' ? 'dom4u' : 'uvula';
+  const otherUser = user === 'kiwi' ? 'dom4u' : 'kiwi';
   const isOtherOnline = presence[otherUser]?.isOnline;
 
   const shakeVariants = {
@@ -289,7 +289,7 @@ const App: React.FC = () => {
               </div>
               <div className="w-7 h-7 md:w-10 md:h-10 rounded-full border border-white/[0.05] flex items-center justify-center bg-white/[0.02] overflow-hidden">
                 <img
-                  src={otherUser === 'uvula' ? IMAGES.uvula_Thumb : IMAGES.dom4u_Thumb}
+                  src={otherUser === 'kiwi' ? IMAGES.kiwi_Thumb : IMAGES.dom4u_Thumb}
                   alt={otherUser}
                   className="w-full h-full object-cover grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all"
                 />
@@ -352,7 +352,7 @@ const LoginScreen: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) =
           <div className="flex items-center justify-center gap-2 md:gap-4 mt-1 md:mt-2">
             <div className="h-[1px] w-8 md:w-12 bg-white/20" />
             <p className="font-display text-[8px] md:text-xs font-bold uppercase tracking-[0.6em] md:tracking-[0.8em] text-white/50 translate-x-[0.3em] md:translate-x-[0.4em]">
-              uvula & dom4u
+              kiwi & dom4u
             </p>
             <div className="h-[1px] w-8 md:w-12 bg-white/20" />
           </div>
@@ -361,9 +361,9 @@ const LoginScreen: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) =
 
       <div className="flex flex-col md:flex-row gap-4 md:gap-12 z-10 w-full max-w-4xl justify-center items-center mt-20 md:mt-0">
         <LoginCard
-          user="uvula"
-          img={IMAGES.uvula_Login}
-          onClick={() => onLogin('uvula')}
+          user="kiwi"
+          img={IMAGES.kiwi_Login}
+          onClick={() => onLogin('kiwi')}
           accent="#a855f7"
         />
         {SHOW_DOM4U_PROFILE && (
